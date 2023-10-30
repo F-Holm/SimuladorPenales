@@ -84,8 +84,14 @@ public:
   }
   void setSensorObjetivo(){
     sensorObjetivo random(8);
-    sensores[sensorObjetivo].encenderLeds();
+    setLeds();
   }
+void setLeds(){
+    for (int i = 0;i < 9;i++){
+        sensores[i].apagarLeds();
+    }
+    sensores[sensorObjetivo].encenderLeds();
+}
   int getSensorObjetivo(){
     return sensorObjetivo;
   }
@@ -111,6 +117,7 @@ void loop() {//Si no le pegan al arco o le pegan a 2 paneles al mismo tiempo tie
       grupoSensores.getSensor(sensor).apagarLed2();
     } else {
       grupoSensores.getSensor(sensor).apagarLed1();
+      grupoSensores.getSensor(grupoSensores.getSensorObjetivo()).encenderLed2();
     }
     //Le envío la información al ESP32 para que la muestre en la página web
     delay(5000);
@@ -121,7 +128,6 @@ void loop() {//Si no le pegan al arco o le pegan a 2 paneles al mismo tiempo tie
     } else {
       intentosRestantes--;
     }
-    grupoSensores.getSensor(sensor).apagarLeds();
     grupoSensores.setSensorObjetivo();
   }
 }
