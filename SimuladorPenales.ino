@@ -123,7 +123,7 @@ void loop() {//Si no le pegan al arco o le pegan a 2 paneles al mismo tiempo tie
     delay(5000);
     if (intentosRestantes == 1){
       intentosRestantes = 3;
-      //Le digo al ESP32 que reinicie la página porque ya terminó esta perosna
+      //Le digo al ESP32 que reinicie la página porque ya terminó esta persona
       delay(5000);
     } else {
       intentosRestantes--;

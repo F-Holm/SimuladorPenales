@@ -1,11 +1,13 @@
-int pinSensor = 23;
+#define sensor 23
+#define led 2
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  pinMode(pinSensor, INPUT);
+Serial.begin(9600);
+  pinMode(sensor, INPUT);
+  pinMode(led, OUTPUT);
 }
 
 void loop() {
-  digitalRead(pinSensor);
+  if (digitalRead(sensor) == HIGH) digitalWrite(led, HIGH);
+  else digitalWrite(led, HIGH);
 }
