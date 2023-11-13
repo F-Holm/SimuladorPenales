@@ -1,7 +1,7 @@
 # SimuladorPenales
 Integrantes:
-- Holm, Federico
-- Esparrach, Santiago
-- Panzera, Lucas
 - Buffa, Ian
 - Casais, Francisco
+- Esparrach, Santiago
+- Holm, Federico
+- Panzera, Lucas
