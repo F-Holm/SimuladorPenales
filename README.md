@@ -1,4 +1,4 @@
-# SimuladorPenals
+# SimuladorPenales
 Integrantes:
 - Holm, Federico
 - Esparrach, Santiago
