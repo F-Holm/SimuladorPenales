@@ -4,7 +4,12 @@
 const char* ssid = "IPM-Wifi";
 const char* password = "ipm5880!";
 
-const char* html = R"rawliteral(
+String colorArco[9] = { "white", "white", "white", "white", "white", "white", "white", "white", };
+
+int estadoIntento[3] = { 2, 2, 2 };// 0 = falló - 1 = GOL - 2 = todavía no pateó
+
+const String html () {
+    return R"rawliteral(
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -160,6 +165,7 @@ const char* html = R"rawliteral(
 </body>
 </html>
 )rawliteral";
+}
 
 AsyncWebServer server(8080);
 
@@ -176,13 +182,18 @@ void setup() {
 
   // Manejo de la ruta principal "/"
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/html", html);
+    request->send(200, "text/html", html());
   });
   Serial.print("Direccion IP: ");
   Serial.println(WiFi.localIP());
 
   // Inicia el servidor
   server.begin();
+
+  //cambio el color de #c1
+  /*server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/html", html + setColor("c1", "blue"));
+  });*/
 }
 
 void loop() {
