@@ -1,16 +1,12 @@
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
-#define bit1Color 23
-#define bit2Color 22
-#define estado 18
+//#include <WebServer.h>
 
 const char* ssid = "IPM-Wifi";
 const char* password = "ipm5880!";
 
-String color[9] = { "white", "white", "white", "white", "white", "white", "white", "white", "white" };//white = 0 = 00 - red = 1 = 01 - blue = 2 = 10 - green = 3 = 11
-String colorActual1 = "000000000";//9 bits
-String colorActual1 = "000000000";//9 bits
-String estadoActual = "010010";//2x3 bits
+String color[9] = { "green", "red", "blue", "white", "white", "white", "white", "white", "white" };//white - red - blue - green
+
 int estadoIntento[3] = { 1, 0, 2 };// 0 = falló - 1 = GOL - 2 = todavía no pateó
 
 String estado (int estado){
@@ -29,13 +25,12 @@ String estado (int estado){
     return "";
 }
 
-String intToBinaryString(int num, int bits) {
+String intToBinaryString(int num) {
     String binaryString = "";
     while (num > 0) {
         binaryString = String(num % 2) + binaryString;
         num /= 2;
     }
-    while (bits.size()<bits) binaryString = "0" + binaryString;
     return binaryString;
 }
 
@@ -49,6 +44,7 @@ int binaryStringToInt(String binaryString) {
         }
         multiplier *= 2;
     }
+
     return decimalNum;
 }
 
@@ -213,7 +209,7 @@ AsyncWebServer server(8080);
 
 void setup() {
   Serial.begin(9600);
-  pinMode(analogPort, INPUT);
+
   // Conéctate a la red WiFi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
