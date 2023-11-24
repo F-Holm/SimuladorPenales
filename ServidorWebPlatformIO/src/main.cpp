@@ -1,170 +1,208 @@
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
+//#include <WebServer.h>
 
 const char* ssid = "IPM-Wifi";
 const char* password = "ipm5880!";
 
-String colorArco[9] = { "white", "white", "white", "white", "white", "white", "white", "white", };
+String color[9] = { "green", "red", "blue", "white", "white", "white", "white", "white", "white" };//white - red - blue - green
 
-int estadoIntento[3] = { 2, 2, 2 };// 0 = falló - 1 = GOL - 2 = todavía no pateó
+int estadoIntento[3] = { 1, 0, 2 };// 0 = falló - 1 = GOL - 2 = todavía no pateó
+
+String estado (int estado){
+    switch (estado)
+    {
+    case 0:
+    return "circulo x";
+        break;
+    case 1:
+    return "circulo tick";
+        break;
+    case 2:
+    return "circulo";
+        break;
+    }
+    return "";
+}
+
+String intToBinaryString(int num) {
+    String binaryString = "";
+    while (num > 0) {
+        binaryString = String(num % 2) + binaryString;
+        num /= 2;
+    }
+    return binaryString;
+}
+
+int binaryStringToInt(String binaryString) {
+    int decimalNum = 0;
+    int multiplier = 1;
+
+    for (int i = binaryString.length() - 1; i >= 0; i--) {
+        if (binaryString[i] == '1') {
+            decimalNum += multiplier;
+        }
+        multiplier *= 2;
+    }
+
+    return decimalNum;
+}
 
 const String html () {
-    return R"rawliteral(
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador penales</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+    String pagina = "<!DOCTYPE html>";
+    pagina += "<html lang=\"es\">";
+    pagina += "<head>";
+    pagina += "<meta charset=\"UTF-8\">";
+    pagina += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
+    pagina += "<title>Simulador penales</title>";
+    pagina += "<style>";
+    pagina += "body {";
+    pagina += "    display: flex;";
+    pagina += "    justify-content: center;";
+    pagina += "    align-items: center;";
+    pagina += "    height: 100vh;";
+    pagina += "    margin: 0;";
+    pagina += "}";
+    pagina += ".soccer-goal {";
+    pagina += "    margin-top: 5vw;";
+    pagina += "    position: relative;";
+    pagina += "    width: 70vw;";
+    pagina += "    height: 35vw;";
+    pagina += "    background-color: white;";
+    pagina += "}";
+    pagina += ".goal-post {";
+    pagina += "    width: 1.6vw;";
+    pagina += "    background-color: black;";
+    pagina += "    position: absolute;";
+    pagina += "}";
+    pagina += ".top-post {";
+    pagina += "    top: 0;";
+    pagina += "    left: 0;";
+    pagina += "    height: 1.6vw;";
+    pagina += "    width: 70vw;";
+    pagina += "}";
+    pagina += ".left-post {";
+    pagina += "    top: 1.6vw;";
+    pagina += "    left: 0;";
+    pagina += "    height: 33.4vw;";
+    pagina += "}";
+    pagina += ".right-post {";
+    pagina += "    top: 1.6vw;";
+    pagina += "    right: 0;";
+    pagina += "    height: 33.4vw;";
+    pagina += "}";
+    pagina += ".goal-grid {";
+    pagina += "    position: absolute;";
+    pagina += "    top: 1.6vw;";
+    pagina += "    left: 1.6vw;";
+    pagina += "    width: 66.8vw;";
+    pagina += "    height: 33.4vw;";
+    pagina += "    display: grid;";
+    pagina += "    grid-template-columns: repeat(3, 1fr);";
+    pagina += "    grid-template-rows: repeat(3, 1fr);";
+    pagina += "}";
+    pagina += ".goal-cell {";
+    pagina += "    border: 0.1vw solid black;";
+    pagina += "    display: flex;";
+    pagina += "    align-items: center;";
+    pagina += "    justify-content: center;";
+    pagina += "}";
+    pagina += "#c1{";
+    pagina += "    background-color: " + color[0] + ";";
+    pagina += "}";
+    pagina += "#c2{";
+    pagina += "    background-color: " + color[1] + ";";
+    pagina += "}";
+    pagina += "#c3{";
+    pagina += "    background-color: " + color[2] + ";";
+    pagina += "}";
+    pagina += "#c4{";
+    pagina += "    background-color: " + color[3] + ";";
+    pagina += "}";
+    pagina += "#c5{";
+    pagina += "    background-color: " + color[4] + ";";
+    pagina += "}";
+    pagina += "#c6{";
+    pagina += "    background-color: " + color[5] + ";";
+    pagina += "}";
+    pagina += "#c7{";
+    pagina += "    background-color: " + color[6] + ";";
+    pagina += "}";
+    pagina += "#c8{";
+    pagina += "    background-color: " + color[7] + ";";
+    pagina += "}";
+    pagina += "#c9{";
+    pagina += "    background-color: " + color[8] + ";";
+    pagina += "}";
+    pagina += ".circulo{";
+    pagina += "    position: absolute;";
+    pagina += "    width: 10vh;";
+    pagina += "    height: 10vh;";
+    pagina += "    border-radius: 50%;";
+    pagina += "    top: 5vh;";
+    pagina += "    border: 0.1vw solid black;";
+    pagina += "}";
+    pagina += "#circulo1{";
+    pagina += "    background-color: green;";
+    pagina += "    margin-right: 45vw;";
+    pagina += "}";
+    pagina += "#circulo2{";
+    pagina += "    background-color: red;";
+    pagina += "}";
+    pagina += "#circulo3{";
+    pagina += "    background-color: white;";
+    pagina += "    margin-left: 45vw;";
+    pagina += "}";
+    pagina += ".tick::before {";
+    pagina += "    content: '\\2713';";
+    pagina += "    font-size: 12vh;";
+    pagina += "    color: white;";
+    pagina += "    position: absolute;";
+    pagina += "    top: 50%;";
+    pagina += "    left: 50%;";
+    pagina += "    transform: translate(-50%, -50%);";
+    pagina += "}";
+    pagina += ".x::before{";
+    pagina += "    content: '\\2717';";
+    pagina += "    font-size: 10vh;";
+    pagina += "    color: white;";
+    pagina += "    position: absolute;";
+    pagina += "    top: 50%;";
+    pagina += "    left: 50%;";
+    pagina += "    transform: translate(-50%, -50%);";
+    pagina += "}";
+    pagina += "</style>";
+    pagina += "</head>";
+    pagina += "<body>";
+    pagina += "<div class=\"" + estado(estadoIntento[0]) + "\" id=\"circulo1\"></div>";
+    pagina += "<div class=\"" + estado(estadoIntento[1]) + "\" id=\"circulo2\"></div>";
+    pagina += "<div class=\"" + estado(estadoIntento[2]) + "\" id=\"circulo3\"></div>";
+    pagina += "<div class=\"soccer-goal\">";
+    pagina += "<div class=\"goal-post top-post\"></div>";
+    pagina += "<div class=\"goal-post left-post\"></div>";
+    pagina += "<div class=\"goal-post right-post\"></div>";
+    pagina += "<div class=\"goal-grid\">";
+    pagina += "<div class=\"goal-cell\" id=\"c1\"></div>";
+    pagina += "<div class=\"goal-cell\" id=\"c2\"></div>";
+    pagina += "<div class=\"goal-cell\" id=\"c3\"></div>";
+    pagina += "<div class=\"goal-cell\" id=\"c4\"></div>";
+    pagina += "<div class=\"goal-cell\" id=\"c5\"></div>";
+    pagina += "<div class=\"goal-cell\" id=\"c6\"></div>";
+    pagina += "<div class=\"goal-cell\" id=\"c7\"></div>";
+    pagina += "<div class=\"goal-cell\" id=\"c8\"></div>";
+    pagina += "<div class=\"goal-cell\" id=\"c9\"></div>";
+    pagina += "</div>";
+    pagina += "</div>";
+    pagina += "</body>";
+    pagina += "</html>";
+    pagina += "<script>";
+    pagina += "    function recargarPagina() {";
+    pagina += "        location.reload();";
+    pagina += "    }";
+    pagina += "    setInterval(recargarPagina, 1000);";
+    pagina += "</script>";
 
-        .soccer-goal {
-            margin-top: 5vw;
-            position: relative;
-            width: 70vw;
-            height: 35vw;
-            background-color: white;
-        }
-
-        .goal-post {
-            width: 1.6vw;
-            background-color: black;
-            position: absolute;
-        }
-
-        .top-post {
-            top: 0;
-            left: 0;
-            height: 1.6vw;
-            width: 70vw;
-        }
-
-        .left-post {
-            top: 1.6vw;
-            left: 0;
-            height: 33.4vw;
-        }
-
-        .right-post {
-            top: 1.6vw;
-            right: 0;
-            height: 33.4vw;
-        }
-
-        .goal-grid {
-            position: absolute;
-            top: 1.6vw;
-            left: 1.6vw;
-            width: 66.8vw;
-            height: 33.4vw;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-        }
-
-        .goal-cell {
-            border: 0.1vw solid black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #c1{
-            background-color: white;
-        }
-        #c2{
-            background-color: white;
-        }
-        #c3{
-            background-color: white;
-        }
-        #c4{
-            background-color: white;
-        }
-        #c5{
-            background-color: white;
-        }
-        #c6{
-            background-color: white;
-        }
-        #c7{
-            background-color: white;
-        }
-        #c8{
-            background-color: white;
-        }
-        #c9{
-            background-color: white;
-        }
-        .circulo{
-            position: absolute;
-            width: 10vh;
-            height: 10vh;
-            border-radius: 50%;
-            top: 5vh;
-            border: 0.1vw solid black;
-        }
-        #circulo1{
-            background-color: green;
-            margin-right: 45vw;
-        }
-        #circulo2{
-            background-color: red;
-        }
-        #circulo3{
-            background-color: white;
-            margin-left: 45vw;
-        }
-        .tick::before {
-            content: '\2713';
-            font-size: 12vh;
-            color: white;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .x::before{
-            content: '\2717';
-            font-size: 10vh;
-            color: white;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-    </style>
-</head>
-<body>
-    <div class="circulo tick" id="circulo1"></div>
-    <div class="circulo x" id="circulo2"></div>
-    <div class="circulo" id="circulo3"></div>
-    <div class="soccer-goal">
-        <div class="goal-post top-post"></div>
-        <div class="goal-post left-post"></div>
-        <div class="goal-post right-post"></div>
-        <div class="goal-grid">
-            <div class="goal-cell" id="c1"></div>
-            <div class="goal-cell" id="c2"></div>
-            <div class="goal-cell" id="c3"></div>
-            <div class="goal-cell" id="c4"></div>
-            <div class="goal-cell" id="c5"></div>
-            <div class="goal-cell" id="c6"></div>
-            <div class="goal-cell" id="c7"></div>
-            <div class="goal-cell" id="c8"></div>
-            <div class="goal-cell" id="c9"></div>
-        </div>
-    </div>
-</body>
-</html>
-)rawliteral";
+    return pagina;
 }
 
 AsyncWebServer server(8080);
@@ -183,19 +221,28 @@ void setup() {
   // Manejo de la ruta principal "/"
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", html());
-  });
+    });
   Serial.print("Direccion IP: ");
-  Serial.println(WiFi.localIP());
+  Serial.print(WiFi.localIP());
+  Serial.println(":8080");
 
   // Inicia el servidor
   server.begin();
-
-  //cambio el color de #c1
-  /*server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/html", html + setColor("c1", "blue"));
-  });*/
 }
-
+bool primera = true;
 void loop() {
-  // Nada por hacer aquí
+    
+    
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/html", html());
+    });
+    //server.begin();
+
+while (!primera);
+    if (primera){
+        delay(5000);
+        color[8] = "red";
+        primera = false;
+        //delay(5000);
+    }
 }
