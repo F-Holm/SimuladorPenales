@@ -1,14 +1,16 @@
+#include <Arduino.h>
+
 String color[9] = { "red", "blue", "red", "white", "white", "white", "white", "white", "white" };
 int estadoIntento[3] = { 1, 0, 2 };
-
+ 
 void setup() {
   Serial.begin(9600);
 }
-
+ 
 int intAsciiToInt (int num){
   return num - 48;
 }
-
+ 
 void recibirYUpdate(){
   while (Serial.available() <= 0);
   for (int i = 0;i < 9;i++){
@@ -33,10 +35,10 @@ void recibirYUpdate(){
     estadoIntento[i] = intAsciiToInt(Serial.read());
   }
 }
-
+ 
 void loop() {
   Serial.println(color[0]);
   recibirYUpdate();
   Serial.println(color[0]);
-  delay(324123541000);
+  delay(10000);
 }

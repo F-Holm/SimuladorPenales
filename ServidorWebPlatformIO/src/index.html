@@ -67,22 +67,22 @@
         }
 
         #c1{
-            background-color: white;
+            background-color: green;
         }
         #c2{
-            background-color: white;
+            background-color: blue;
         }
         #c3{
-            background-color: white;
+            background-color: red;
         }
         #c4{
-            background-color: white;
+            background-color: red;
         }
         #c5{
-            background-color: white;
+            background-color: blue;
         }
         #c6{
-            background-color: white;
+            background-color: green;
         }
         #c7{
             background-color: white;
@@ -100,16 +100,55 @@
             border-radius: 50%;
             top: 5vh;
             border: 0.1vw solid black;
+            background-color: white;
+        }
+        .circuloRojoX{
+            position: absolute;
+            width: 10vh;
+            height: 10vh;
+            border-radius: 50%;
+            top: 5vh;
+            border: 0.1vw solid black;
+            background-color: red;
+            content: '\2717';
+            font-size: 10vh;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .circuloVerdeTick{
+            position: absolute;
+            width: 10vh;
+            height: 10vh;
+            border-radius: 50%;
+            top: 5vh;
+            border: 0.1vw solid black;
+            background-color: green;
+            content: '\2713';
+            font-size: 12vh;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .verde{
+            background-color: green;
+        }
+        .rojo{
+            background-color: red;
+        }
+        .blanco{
+            background-color: white;
         }
         #circulo1{
-            background-color: green;
             margin-right: 45vw;
         }
         #circulo2{
-            background-color: red;
         }
         #circulo3{
-            background-color: white;
             margin-left: 45vw;
         }
         .tick::before {
@@ -133,8 +172,8 @@
     </style>
 </head>
 <body>
-    <div class="circulo tick" id="circulo1"></div>
-    <div class="circulo x" id="circulo2"></div>
+    <div class="circuloVerdeTick" id="circulo1"></div>
+    <div class="circuloRojoX" id="circulo2"></div>
     <div class="circulo" id="circulo3"></div>
     <div class="soccer-goal">
         <div class="goal-post top-post"></div>
@@ -158,5 +197,9 @@
     function recargarPagina() {
         location.reload();
     }
-    setInterval(recargarPagina, 1000);
+    // /setInterval(recargarPagina, 1000);
+</script>
+<script>
+//document.getElementById("c9").style.backgroundColor = "white";
+//document.getElementById("circulo3").className = "circulo verde tick";
 </script>

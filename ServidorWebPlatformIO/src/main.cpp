@@ -1,55 +1,26 @@
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
-#define bit1Color 23
-#define bit2Color 22
-#define estado 18
 
 const char* ssid = "IPM-Wifi";
 const char* password = "ipm5880!";
 
 String color[9] = { "white", "white", "white", "white", "white", "white", "white", "white", "white" };//white = 0 = 00 - red = 1 = 01 - blue = 2 = 10 - green = 3 = 11
-String colorActual1 = "000000000";//9 bits
-String colorActual1 = "000000000";//9 bits
-String estadoActual = "010010";//2x3 bits
-int estadoIntento[3] = { 1, 0, 2 };// 0 = falló - 1 = GOL - 2 = todavía no pateó
+int estadoIntento[3] = { 0, 0, 0 };// 0 = falló - 1 = GOL - 2 = todavía no pateó
 
 String estado (int estado){
     switch (estado)
     {
     case 0:
-    return "circulo x";
+    return "circulo rojo x";
         break;
     case 1:
-    return "circulo tick";
+    return "circulo verde tick";
         break;
     case 2:
-    return "circulo";
+    return "circulo blanco";
         break;
     }
     return "";
-}
-
-String intToBinaryString(int num, int bits) {
-    String binaryString = "";
-    while (num > 0) {
-        binaryString = String(num % 2) + binaryString;
-        num /= 2;
-    }
-    while (bits.size()<bits) binaryString = "0" + binaryString;
-    return binaryString;
-}
-
-int binaryStringToInt(String binaryString) {
-    int decimalNum = 0;
-    int multiplier = 1;
-
-    for (int i = binaryString.length() - 1; i >= 0; i--) {
-        if (binaryString[i] == '1') {
-            decimalNum += multiplier;
-        }
-        multiplier *= 2;
-    }
-    return decimalNum;
 }
 
 const String html () {
@@ -146,15 +117,21 @@ const String html () {
     pagina += "    top: 5vh;";
     pagina += "    border: 0.1vw solid black;";
     pagina += "}";
+    pagina += ".verde{";
+    pagina += "        background-color: green;";
+    pagina += "    }";
+    pagina += "    .rojo{";
+    pagina += "        background-color: red;";
+    pagina += "    }";
+    pagina += "    .blanco{";
+    pagina += "        background-color: white;";
+    pagina += "    }";
     pagina += "#circulo1{";
-    pagina += "    background-color: green;";
     pagina += "    margin-right: 45vw;";
     pagina += "}";
     pagina += "#circulo2{";
-    pagina += "    background-color: red;";
     pagina += "}";
     pagina += "#circulo3{";
-    pagina += "    background-color: white;";
     pagina += "    margin-left: 45vw;";
     pagina += "}";
     pagina += ".tick::before {";
@@ -178,9 +155,9 @@ const String html () {
     pagina += "</style>";
     pagina += "</head>";
     pagina += "<body>";
-    pagina += "<div class=\"" + estado(estadoIntento[0]) + "\" id=\"circulo1\"></div>";
-    pagina += "<div class=\"" + estado(estadoIntento[1]) + "\" id=\"circulo2\"></div>";
-    pagina += "<div class=\"" + estado(estadoIntento[2]) + "\" id=\"circulo3\"></div>";
+    pagina += "<div class='" + estado(estadoIntento[0]) + "' id='circulo1'></div>";
+    pagina += "<div class='" + estado(estadoIntento[1]) + "' id='circulo2'></div>";
+    pagina += "<div class='" + estado(estadoIntento[2]) + "' id='circulo3'></div>";
     pagina += "<div class=\"soccer-goal\">";
     pagina += "<div class=\"goal-post top-post\"></div>";
     pagina += "<div class=\"goal-post left-post\"></div>";
@@ -204,16 +181,56 @@ const String html () {
     pagina += "        location.reload();";
     pagina += "    }";
     pagina += "    setInterval(recargarPagina, 1000);";
+    //for (int i = 0;i < 9;i++) pagina += "document.getElementById(\"c" + String(i+1) + "\").style.backgroundColor = " + color[i] + ";";
+    //for (int i = 0;i < 3;i++) pagina += "document.getElementById(\"circulo" + String(i+1) + "\").className = " + estado(estadoIntento[i]) + ";";
     pagina += "</script>";
 
     return pagina;
 }
 
+int intAsciiToInt (int num){
+  return num - 48;
+}
+ 
+void recibirYUpdate(){
+  int num = 0;
+  while (true){
+    while(Serial.available() <= 0);
+    num = intAsciiToInt(Serial.read());
+    if (num == 4) break;
+  }
+  Serial.print(num);
+  for (int i = 0;i < 9;i++){
+    while (Serial.available() <= 0);
+    num = intAsciiToInt(Serial.read());
+    Serial.print(num);
+    switch(num){
+      case 0:
+      	color[i] = "white";
+      	break;
+      case 1:
+      	color[i] = "green";
+      	break;
+      case 2:
+      	color[i] = "blue";
+        //Serial.println(String(i) + "estoy en blue");
+      	break;
+      case 3:
+      	color[i] = "red";
+      	break;
+    }
+    for (int i = 0;i < 3;i++){
+      while (Serial.available() <= 0);
+      num = intAsciiToInt(Serial.read());
+      Serial.print(num);
+      estadoIntento[i] = num;
+    }
+  }
+}
 AsyncWebServer server(8080);
 
 void setup() {
   Serial.begin(9600);
-  pinMode(analogPort, INPUT);
   // Conéctate a la red WiFi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -232,11 +249,18 @@ void setup() {
 
   // Inicia el servidor
   server.begin();
+
+  delay(5000);
+  Serial.print(4);
 }
-bool primera = true;
 void loop() {
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  delay(1000);
+  /*for (int i = 0;i < 9;i++){
+    if (color[i][0] != 'w') Serial.println(String(i+1) + " " + color[i]);
+  }*/
+  recibirYUpdate();
+  color[1] = "red";
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", html());
-    });
-    if ()
+  });
 }
