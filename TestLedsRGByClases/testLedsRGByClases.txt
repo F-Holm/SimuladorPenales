@@ -1,0 +1,87 @@
+#define cantSensores 2
+
+void setup()
+{
+  Serial.begin(9600);
+}
+
+class Sensor{
+  private:
+  
+  int boton;
+  int red;
+  int green;
+  int blue;
+  
+  public:
+  
+  Sensor(int _boton, int _red, int _green, int _blue){
+    boton = _boton;
+    red = _red;
+    green = _green;
+    blue = _blue;
+    
+    pinMode(boton, INPUT);
+    pinMode(red, OUTPUT);
+  	pinMode(green, OUTPUT);
+  	pinMode(blue, OUTPUT);
+  }
+  
+  void red_(){
+  	digitalWrite(red, HIGH);
+  	digitalWrite(green, LOW);
+  	digitalWrite(blue, LOW);
+	}
+
+  void green_(){
+  	digitalWrite(red, LOW);
+  	digitalWrite(green, HIGH);
+  	digitalWrite(blue, LOW);
+  }
+
+  void blue_(){
+  	digitalWrite(red, LOW);
+  	digitalWrite(green, LOW);
+  	digitalWrite(blue, HIGH);
+  }
+  
+  bool boton_(){
+    return digitalRead(boton);
+  }
+};
+
+class GrupoSensores{
+  public:
+  Sensor sensores[cantSensores] = {Sensor(2, 3, 4, 5), Sensor(8, 9, 10, 11)};
+  
+  void red(int sensor){
+    sensores[sensor].red_();
+  }
+  
+  void green(int sensor){
+    sensores[sensor].green_();
+  }
+  
+  void blue(int sensor){
+    sensores[sensor].blue_();
+  }
+  
+  int waitBoton(){
+    while(true){
+      for (int i = 0;i < cantSensores;i++){
+        if (sensores[i].boton_()) return i;
+      }
+      delay(10);
+    }
+  }
+};
+
+GrupoSensores sensores;
+
+void loop()
+{
+  sensores.red(0);
+  sensores.red(1);
+  sensores.blue(sensores.waitBoton());
+  delay(1000);
+}
