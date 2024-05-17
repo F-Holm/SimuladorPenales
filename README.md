@@ -6,6 +6,6 @@ Integrantes 4 CSTC A:
 - Holm, Federico
 - Panzera, Lucas
 
-Inregrantes 4 CSTM:
+Integrantes 4 CSTM:
 - Castaño, Manuel
 - Monteserín, Juan Mateo
